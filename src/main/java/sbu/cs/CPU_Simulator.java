@@ -17,13 +17,13 @@ import java.util.List;
     Use the tests provided in the test folder to ensure your code works correctly.
  */
 
-public class CPU_Simulator
-{
+public class CPU_Simulator {
     public static class Task implements Runnable {
         long processingTime;
         String ID;
         public Task(String ID, long processingTime) {
-        // TODO
+            this.ID = ID;
+            this.processingTime = processingTime;
         }
 
     /*
@@ -32,7 +32,11 @@ public class CPU_Simulator
     */
         @Override
         public void run() {
-        // TODO
+            try {
+                Thread.sleep(processingTime*1000);
+            } catch (InterruptedException e){
+                e.printStackTrace();
+            }
         }
     }
 
@@ -43,12 +47,36 @@ public class CPU_Simulator
     */
     public ArrayList<String> startSimulation(ArrayList<Task> tasks) {
         ArrayList<String> executedTasks = new ArrayList<>();
-
-        // TODO
-
+        while (!tasks.isEmpty()) {
+            Task shortestTask = tasks.get(0);
+            for (Task task : tasks) {
+                if (task.processingTime < shortestTask.processingTime) {
+                    shortestTask = task;
+                }
+            }
+            tasks.remove(shortestTask);
+            Thread t = new Thread(shortestTask);
+            t.start();
+            try {
+                t.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            executedTasks.add(shortestTask.ID);
+            System.out.println("Task " + shortestTask.ID + " executed");
+        }
         return executedTasks;
     }
 
     public static void main(String[] args) {
+        ArrayList<Task> tasks = new ArrayList<>();
+        tasks.add(new Task("1", 10));
+        tasks.add(new Task("2", 13));
+        tasks.add(new Task("3", 7));
+        tasks.add(new Task("4", 3));
+        tasks.add(new Task("5", 20));
+        CPU_Simulator simulator = new CPU_Simulator();
+        ArrayList<String> executedTasks = simulator.startSimulation(tasks);
+        System.out.println("All tasks executed successfully. Executed tasks: " + executedTasks);
     }
 }
